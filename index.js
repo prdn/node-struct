@@ -7,6 +7,37 @@ module.exports = exports = Struct;
 // compatibility
 exports.Struct = Struct;
 
+var Long = require('./long');
+
+function createInt64Writer(signed) {
+  return function(val, offset) {
+    var n = new Long.fromString(val + '');
+    this.writeInt32LE(n.getHighBits(), offset + 4);
+    this.writeInt32LE(n.getLowBits(), offset);
+  }
+}
+
+function createInt64Reader(signed) {
+  return function(offset) {
+    return Long(
+      this.readInt32LE(offset),
+      this.readInt32LE(offset + 4)
+    ).toNumber();
+  }
+}
+
+Buffer.prototype.writeInt64 = createInt64Writer();
+Buffer.prototype.writeInt64LE = Buffer.prototype.writeInt64;
+Buffer.prototype.writeUInt64LE = Buffer.prototype.writeInt64;
+Buffer.prototype.writeInt64BE = Buffer.prototype.writeInt64;
+Buffer.prototype.writeUInt64BE = Buffer.prototype.writeInt64;
+
+Buffer.prototype.readInt64 = createInt64Reader();
+Buffer.prototype.readInt64LE = Buffer.prototype.readInt64;
+Buffer.prototype.readUInt64LE = Buffer.prototype.readInt64;
+Buffer.prototype.readInt64BE = Buffer.prototype.readInt64;
+Buffer.prototype.readUInt64BE = Buffer.prototype.readInt64;
+
 function byteField(p, offset) {
     this.length = 1;
     this.offset = offset;
